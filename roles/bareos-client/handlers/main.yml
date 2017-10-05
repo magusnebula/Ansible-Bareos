@@ -1,0 +1,15 @@
+##/ ******************************* INFORMATION ***************************//
+##/ ***********************************************************************//
+##/
+##/ ** "roles/bareos-client/handlers/main.yml" - reloads client service when needed
+##/ **
+##/ ** @author   Stephen McElroy <magusnebula@gmail.com>
+##/ ** @date     Aug 28, 2017
+##/ ** @access   public
+##/ ** @type     Ansible handler file
+##/ ** @updated  Oct 5, 2017
+##/
+##/ ***********************************************************************//
+
+- name: reload bareos-client
+  action: service name=bareos-fd state=restarted
