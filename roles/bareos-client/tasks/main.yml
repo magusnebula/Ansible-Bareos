@@ -1,0 +1,48 @@
+##/ ******************************* INFORMATION ***************************//
+##/ ***********************************************************************//
+##/
+##/ ** "roles/bareos-client/tasks/main.yml" - Bareos-client main tasks
+##/ **
+##/ ** @author   Stephen McElroy <magusnebula@gmail.com>
+##/ ** @date     Aug 28, 2017
+##/ ** @access   public
+##/ ** @type     Ansible tasks file
+##/ ** @updated  Oct 5, 2017
+##/
+##/ ***********************************************************************//
+
+---
+- name: Install Packages
+  yum: name={{ item }} state=present
+  with_items:
+    - bareos-client
+  tags:
+    - packages
+
+- name:  Create a unique md5 generated hash for console password
+  shell:  echo -n {{ ansible_hostname }}{{ hash_offset }}|md5sum|awk {'print $1'}
+  register: md5_hash
+
+- name: Configure bareos client
+  template: src=myself.conf dest={{ filedaemon_location_config }}/client/myself.conf mode=0640 owner=bareos group=bareos
+  notify: reload bareos-client
+  
+- name: Configure bareos client messages config
+  template: src=Standard.conf dest={{ filedaemon_location_config }}/messages/Standard.conf mode=0640 owner=bareos group=bareos
+  notify: reload bareos-client
+
+- name: Configure bareos client director config
+  template: src=bareos-dir.conf dest={{ filedaemon_location_config }}/director/bareos-dir.conf mode=0640 owner=bareos group=bareos
+  notify: reload bareos-client
+
+- name: Configure bareos client mon
+  template: src=bareos-mon.conf dest={{ filedaemon_location_config }}/director/bareos-mon.conf mode=0640 owner=bareos group=bareos
+  notify: reload bareos-client
+
+- name: Configure bareos bconsole config
+  template: src=bconsole.conf dest=/etc/bareos/bconsole.conf mode=0640 owner=bareos group=bareos
+  notify: reload bareos-client
+  
+- name: Enable bareos client service
+  action: service name=bareos-fd state=started enabled=yes
+
