@@ -1,0 +1,79 @@
+##/ ******************************* INFORMATION ***************************//
+##/ ***********************************************************************//
+##/
+##/ ** "roles/bareos-storage/tasks/main.yml" - main tasks for storage role
+##/ **
+##/ ** @author   Stephen McElroy <magusnebula@gmail.com>
+##/ ** @date     Aug 28, 2017
+##/ ** @access   public
+##/ ** @type     Ansible task file
+##/ ** @updated  Oct 5, 2017
+##/
+##/ ***********************************************************************//
+
+---
+## Install base bareos-storage package
+- name: Install Storage Packages
+  yum: name={{ item }} state=present
+  with_items:
+    - bareos-storage
+  tags:
+    - packages
+
+- name: disable firewalld service
+  action: service name=firewalld state=stopped enabled=no
+  tags:
+    - config
+
+- name: Create storage location
+  file: path={{ storage_location }} owner=bareos group=bareos  mode=0770 state=directory
+  tags:
+    - config
+  
+- name: Configure bareos storage
+  template: src=bareos-sd.conf dest={{ storage_location_config }}/storage/bareos-sd.conf mode=0640 owner=bareos group=bareos
+  notify: reload bareos-storage
+  tags:
+    - config
+    
+- name: Configure bareos self
+  template: src=Standard.conf dest={{ storage_location_config }}/messages/Standard.conf mode=0640 owner=bareos group=bareos
+  notify: reload bareos-storage
+  tags:
+    - config
+    
+- name: Configure bareos director file 
+  template: src=bareos-dir.conf dest={{ storage_location_config }}/director/bareos-dir.conf mode=0640 owner=bareos group=bareos
+  notify: reload bareos-storage
+  tags:
+    - config
+    
+- name: Configure bareos console conf
+  template: src=bareos-mon.conf dest={{ storage_location_config }}/director/bareos-mon.conf mode=0640 owner=bareos group=bareos
+  notify: reload bareos-storage
+  tags:
+    - config
+    
+- name: Configure bareos storage devices
+  template: src=device.conf dest={{ storage_location_config }}/device/{{ item }}.conf mode=0640 owner=bareos group=bareos
+  with_items:
+     - FileStorage1
+     - FileStorage2
+     - FileStorage3
+     - FileStorage4
+     - FileStorage5
+     - FileStorage6
+     - FileStorage7
+     - FileStorage8
+     - FileStorage9
+     - FileStorage10
+     - FileStorage11
+     - FileStorage12
+     - FileStorage13
+     - FileStorage14
+     - FileStorage15
+
+  notify: reload bareos-storage
+  
+- name: Enable bareos storage service
+  action: service name=bareos-sd state=started enabled=yes
