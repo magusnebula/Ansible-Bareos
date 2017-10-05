@@ -1,0 +1,66 @@
+##/ ******************************* INFORMATION ***************************//
+##/ ***********************************************************************//
+##/  
+##/ ** ALL - global var file for all hosts 
+##/ ** 
+##/ ** @author   Stephen McElroy <magusnebula@gmail.com>
+##/ ** @date     Aug 28, 2017
+##/ ** @access   public
+##/ ** @type     Ansible Var file
+##/ ** @updated  Sept 20, 2017 
+##/      
+##/ ***********************************************************************//
+
+
+##/ ********************************** START ******************************//   
+##/ =======================================================================// 
+##/ Global Config                                                          //        
+##/ =======================================================================//  
+
+bareos_version: 16.2
+search_domain: .company.xyx
+
+# Webui - Set true to install web interface
+bareos_webui: true
+
+##/ =======================================================================//
+##/ Passwords for Daemons                                                  //
+##/ =======================================================================//
+
+director_password: change_me
+client_password: change_me
+storage_password: change_me
+restricted_console_password: change_me
+
+##/ =======================================================================//
+##/ Default config locations                                               //
+##/ =======================================================================//
+
+filedaemon_location_config: /etc/bareos/bareos-fd.d
+storage_location_config: /etc/bareos/bareos-sd.d
+director_location_config: /etc/bareos/bareos-dir.d
+
+##/ =======================================================================//
+##/ Director settings                                                      //
+##/ =======================================================================//
+
+director_host: dir-server-name
+director_max_concurrent: 200
+
+##/ =======================================================================//
+##/ Storage settings                                                       //
+##/ =======================================================================//
+
+storage_host: sd-server-name
+storage_location: /bareos
+
+##/ =======================================================================//
+##/ Client Settings                                                        //
+##/ =======================================================================//
+
+## This is a simple way to provide unique bconsole access to clients, and
+## change all their access keys at a moments notice.
+hash_offset: 000-001
+
+## Standard retention for all volumes
+retention: "7 days"
