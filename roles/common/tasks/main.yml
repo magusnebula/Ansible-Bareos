@@ -1,3 +1,5 @@
+
+
 ---
 - name: add bareos repo centos
   yum_repository: 
@@ -6,6 +8,8 @@
     gpgkey: http://download.bareos.org/bareos/release/{{ bareos_version }}/CentOS_7/repodata/repomd.xml.key
     description: "Bareos Repo"
     state: present
+  tags:
+    - repo
   when:
     - ansible_distribution == "CentOS"
     - ansible_distribution_major_version == "7"
@@ -17,6 +21,8 @@
     gpgkey: http://download.bareos.org/bareos/release/{{ bareos_version }}/RHEL_7/repodata/repomd.xml.key
     description: "Bareos Repo"
     state: present
+  tags:
+    - repo
   when:
     - ansible_distribution == "RedHat"
     - ansible_distribution_major_version == "7"
@@ -28,6 +34,8 @@
     gpgkey: http://download.bareos.org/bareos/release/{{ bareos_version }}/RHEL_6/repodata/repomd.xml.key
     description: "Bareos Repo"
     state: present
+  tags:
+    - repo
   when:
     - ansible_distribution == "RedHat"
     - ansible_distribution_major_version == "6"
@@ -39,6 +47,8 @@
     gpgkey: http://download.bareos.org/bareos/release/{{ bareos_version }}/RHEL_5/repodata/repomd.xml.key
     description: "Bareos Repo"
     state: present
+  tags:
+    - repo
   when:
     - ansible_distribution == "RedHat"
     - ansible_distribution_major_version == "5"
