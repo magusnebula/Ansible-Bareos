@@ -135,7 +135,7 @@
     - config
 
 - name: Create file storage config files
-  template: src=rssfile.conf dest="/etc/bareos/bareos-dir.d/storage/{{ item }}.conf" mode=0640 owner=bareos group=bareos
+  template: src=filestorage.conf dest="/etc/bareos/bareos-dir.d/storage/{{ item }}.conf" mode=0640 owner=bareos group=bareos
   with_items: "{{ groups.storage }}"
   notify: reload bareos-dir
   tags:
