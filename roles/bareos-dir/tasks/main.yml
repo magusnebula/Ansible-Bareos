@@ -1,0 +1,174 @@
+---
+- name: Install Director Packages
+  yum: name={{ item }} state=present
+  with_items:
+    - bareos-director
+    - bareos-database-mysql
+    - mysql
+    - mariadb-server
+    - bareos-bconsole
+  tags:
+    - packages
+
+- name: Install Webui Packages
+  yum: name={{ item }} state=present
+  with_items:
+    - httpd 
+    - php 
+    - php-cli 
+    - php-common
+    - epel-release
+    - bareos-webui
+  when: bareos_webui
+  tags:
+    - packages
+
+- name: disable firewalld service
+  action: service name=firewalld state=stopped enabled=no
+  tags:
+    - config
+
+- name: enable mysql service
+  action: service name=mariadb state=started enabled=yes 
+  tags:
+    - config
+    
+- name: enable httpd service
+  action: service name=httpd state=started enabled=yes
+  when: bareos_webui
+  tags:
+    - config
+    
+- name: Enable admin account 
+  template: src=admin.conf dest={{ director_location_config }}/console/admin.conf mode=0640 owner=bareos group=bareos
+  when: bareos_webui
+  notify: reload bareos-dir
+  tags:
+    - config 
+    
+- name: Push Bareos-Dir configuration file
+  template: src=bareos-dir.conf dest={{ director_location_config }}/director/bareos-dir.conf mode=0640 owner=bareos group=bareos
+  notify: reload bareos-dir
+  tags:
+    - config
+
+- name: Create self-client config files
+  template: src=client.conf dest="/etc/bareos/bareos-dir.d/client/{{ ansible_hostname }}-fd.conf" mode=0640 owner=bareos group=bareos
+  with_items: "{{ ansible_hostname }}"
+  notify: reload bareos-dir
+  tags:
+    - config
+  
+- name: Create manual schedule files
+  template: src=schedulemanual.conf dest="/etc/bareos/bareos-dir.d/schedule/Manual.conf" mode=0640 owner=bareos group=bareos
+  notify: reload bareos-dir
+  tags:
+    - config
+
+- name: Create default schedule files
+  template: src=schedule.conf dest="/etc/bareos/bareos-dir.d/schedule/WeeklyFullSaturday-{{ item }}.conf" mode=0640 owner=bareos group=bareos
+  with_items:
+    - "01:00"
+    - "03:00"
+    - "05:00"
+    - "07:00"
+    - "09:00"
+    - "11:00"
+    - "13:00"
+    - "15:00"
+    - "17:00"
+    - "19:00"
+    - "21:00"
+    - "23:00"
+  notify: reload bareos-dir
+  tags:
+    - config
+
+- name: Create client config files
+  template: src=client.conf dest="/etc/bareos/bareos-dir.d/client/{{ item }}-fd.conf" mode=0640 owner=bareos group=bareos
+  with_items: "{{ groups.clients }}"
+  notify: reload bareos-dir
+  tags:
+    - client
+
+- name: Create client job files
+  template: src=jobs.conf dest="/etc/bareos/bareos-dir.d/job/{{ item }}-fd.conf" mode=0640 owner=bareos group=bareos
+  with_items: "{{ groups.clients }}"
+  notify: reload bareos-dir
+  tags:
+    - client
+
+- name: Create defaultjob files
+  template: src=jobdef.conf dest="/etc/bareos/bareos-dir.d/jobdefs/DefaultJob.conf" mode=0640 owner=bareos group=bareos
+  notify: reload bareos-dir
+  tags:
+    - config
+
+- name: Create default linux job files
+  template: src=linuxjobdef.conf dest="/etc/bareos/bareos-dir.d/jobdefs/DefaultLinuxJob.conf" mode=0640 owner=bareos group=bareos
+  notify: reload bareos-dir
+  tags:
+    - config
+
+- name: Create linuxall.conf files
+  template: src=linuxall.conf dest="/etc/bareos/bareos-dir.d/fileset/LinuxAll.conf" mode=0640 owner=bareos group=bareos
+  notify: reload bareos-dir
+  tags:
+    - config
+
+- name: Create Full pool files
+  template: src=full.conf dest="/etc/bareos/bareos-dir.d/pool/Full.conf" mode=0640 owner=bareos group=bareos
+  notify: reload bareos-dir
+  tags:
+    - config
+
+- name: Create Inc pool files
+  template: src=incremental.conf dest="/etc/bareos/bareos-dir.d/pool/Incremental.conf" mode=0640 owner=bareos group=bareos
+  notify: reload bareos-dir
+  tags:
+    - config
+
+- name: Create Diff pool files
+  template: src=differential.conf dest="/etc/bareos/bareos-dir.d/pool/Differential.conf" mode=0640 owner=bareos group=bareos
+  notify: reload bareos-dir
+  tags:
+    - config
+
+- name: Create file storage config files
+  template: src=rssfile.conf dest="/etc/bareos/bareos-dir.d/storage/{{ item }}.conf" mode=0640 owner=bareos group=bareos
+  with_items: "{{ groups.storage }}"
+  notify: reload bareos-dir
+  tags:
+    - storage
+
+- name: create self bconsole configuration file
+  template: src=bconsole.conf dest="/etc/bareos/bconsole.conf" mode=0640 owner=root group=bareos
+  notify: reload bareos-dir
+  tags:
+    - config
+
+- name: create client console configuration file
+  template: src=console_client.conf dest="/etc/bareos/bareos-dir.d/console/{{ item }}-fd.conf" mode=0640 owner=bareos group=bareos
+  with_items: "{{ groups.linux }}"
+  notify: reload bareos-dir
+
+- name: create bareos database
+  command: /usr/lib/bareos/scripts/create_bareos_database
+  ignore_errors: yes
+  tags:
+    - config
+
+- name: create tables 
+  command: /usr/lib/bareos/scripts/make_bareos_tables
+  ignore_errors: yes
+  tags:
+    - config
+    
+- name: grant privs
+  command: /usr/lib/bareos/scripts/grant_bareos_privileges
+  ignore_errors: yes
+  tags:
+    - config
+    
+- name: enable bareos director service
+  action: service name=bareos-dir state=started enabled=yes 
