@@ -1,0 +1,16 @@
+[director]
+director-node1
+
+[storage]
+storage-node1
+storage-node2
+
+[linux]
+linuxclient1 schedule=WeeklyFullSaturday-01:00 storage=storage-node1 fileset=LinuxAll jobdef="DefaultJob"
+
+[windows]
+windowsclient1 schedule=WeeklyFullSaturday-23:00 storage=storage-node2 fileset=WindowsAll jobdef="DefaultJob"
+
+[clients:children]
+linux
+windows
