@@ -1,0 +1,27 @@
+---
+- hosts: director:storage
+  gather_facts: yes
+  user: root
+  roles:
+    - common
+
+- hosts: clients
+  gather_facts: yes
+  user: root
+  roles:
+    - common
+
+- hosts: director
+  user: root
+  roles:
+    - bareos-dir
+
+- hosts: clients
+  user:root
+  roles:
+    - bareos-client
+
+- hosts: storage
+  user: root
+  roles:
+    - bareos-storage
