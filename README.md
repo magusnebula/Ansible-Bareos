@@ -1,5 +1,5 @@
 # Ansible-Bareos
-Ansible module for rolling out a Bareos Enviroment
+Ansible module for rolling out a Bareos Enviroment. This is a vastly updated version of https://github.com/tiernap/ansible-bareos/ made to run on 16.2.
 
 ## Running the playbook
 ```
